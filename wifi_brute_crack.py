@@ -1,6 +1,9 @@
 import os, sys, csv
+from ssl import _PasswordType
 from subprocess import call, check_output, CalledProcessError, Popen
 import xml.etree.ElementTree as ET
+
+from numpy import get_array_wrap
 
 
 PASSWORDS = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'password.csv')
@@ -36,20 +39,20 @@ def _sanitize_field(node):
 def get_password_array(password):
 	password_data = []
 	pass_array = []
-	#all lower
+	# all lower
 	alllow_pass = password
 	pass_array.append(alllow_pass)
-	#all upper
-	allup_pass = _pass.upper()
+	# all upper
+	allup_pass = password.upper()
 	pass_array.append(allup_pass)
-	#first upper
-	fup_pass = "".join(c.upper() if i in set([0]) else c for i, c in enumerate(_pass))
+	# first upper
+	fup_pass = "".join(c.upper() if i in set([0]) else c for i, c in enumerate(password))
 	pass_array.append(fup_pass)
-	#every other lower
-	eol_pass = "".join(c.lower() if i % 2 == 0  else c for i, c in enumerate(_pass))
+	# every other lower
+	eol_pass = "".join(c.lower() if i % 2 == 0 else c for i, c in enumerate(password))
 	pass_array.append(eol_pass)
 	#every other upper
-	eou_pass = "".join(c.upper() if i % 2 == 0  else c for i, c in enumerate(_pass))
+	eou_pass = "".join(c.upper() if i % 2 == 0  else c for i, c in enumerate(_PasswordType))
 	pass_array.append(eou_pass)
 
 	password_data.append(len(pass_array))
@@ -58,9 +61,9 @@ def get_password_array(password):
 
 
 def process_element(itera,elem,networks):
-	net_size = net_array[0]
-	net_data = net_array[1]
-	net_names_array = net_array[2]
+	net_size = network_data[0]
+	net_data = network_data[1]
+	net_names_array = network_data[2]
 	_freq = _sanitize_field(elem[1])
 	_password = _sanitize_field(elem[0])
 
@@ -84,18 +87,17 @@ def process_element(itera,elem,networks):
 				continue
 
 			if output:
-				#if connection is succesful
-				print 'Network Name: %s\n Network SSID: %s\n Network Password: %s\n' % (net_names_array[i],net_data[i],alllow_pass)
+				# if connection is successful
+				new_var = 'Network Name: %s\n Network SSID: %s\n Network Password: %s\n'
+				print(new_var % (net_names_array[i], net_data[i], passwords[1][j]))
 				sys.exit()
 	
 
 #get network array (size of list, list)
 network_data = get_network_list()
 
-
 with open(PASSWORDS, 'rU') as f:
-	#filtered = (l.replace('\n', '') for l in f)
 	reader = csv.reader(f)
 	for i, line in enumerate(reader):
-		#print line
-		process_element(i,line,net_array)
+		process_element(i, line, network_data)
+ 
